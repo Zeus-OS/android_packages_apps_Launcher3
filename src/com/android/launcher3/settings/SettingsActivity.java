@@ -162,6 +162,14 @@ public class SettingsActivity extends Activity
             if (!Utilities.isPackageInstalled(getActivity(), LauncherTab.SEARCH_PACKAGE)) {
                 getPreferenceScreen().removePreference(feedIntegration);
             }
+
+            Preference showQsbWidget = findPreference(Utilities.QSB_SHOW);
+            showQsbWidget.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Utilities.restart(getActivity());
+                    return true;
+                }
+            });
         }
 
         @Override
