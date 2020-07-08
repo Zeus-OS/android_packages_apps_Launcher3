@@ -101,6 +101,7 @@ public class InvariantDeviceProfile {
     public int numFolderColumns;
     public float iconSize;
     public String iconShapePath;
+    public String iconPack;
     public float landscapeIconSize;
     public int iconBitmapSize;
     public int fillResIconDpi;
@@ -136,6 +137,7 @@ public class InvariantDeviceProfile {
         numFolderColumns = p.numFolderColumns;
         iconSize = p.iconSize;
         iconShapePath = p.iconShapePath;
+        iconPack = p.iconPack;
         landscapeIconSize = p.landscapeIconSize;
         iconTextSize = p.iconTextSize;
         numHotseatIcons = p.numHotseatIcons;
@@ -251,6 +253,34 @@ public class InvariantDeviceProfile {
         return closestProfile.name;
     }
 
+    private void initGridOption(Context context, ArrayList<DisplayOption> options,
+            DisplayOption displayOption, DisplayMetrics metrics) {
+        GridOption closestProfile = options.get(0).grid;
+        numRows = closestProfile.numRows;
+        numColumns = closestProfile.numColumns;
+        numHotseatIcons = closestProfile.numHotseatIcons;
+        defaultLayoutId = closestProfile.defaultLayoutId;
+        demoModeLayoutId = closestProfile.demoModeLayoutId;
+        numFolderRows = closestProfile.numFolderRows;
+        numFolderColumns = closestProfile.numFolderColumns;
+        numAllAppsColumns = numColumns;
+
+        mExtraAttrs = closestProfile.extraAttrs;
+
+        iconSize = displayOption.iconSize;
+        iconShapePath = getIconShapePath(context);
+        iconPack = IconPackProvider.getCurrentIconPack(context);
+        landscapeIconSize = displayOption.landscapeIconSize;
+        iconBitmapSize = ResourceUtils.pxFromDp(iconSize, metrics);
+        iconTextSize = displayOption.iconTextSize;
+        fillResIconDpi = getLauncherIconDensity(iconBitmapSize);
+
+        // If the partner customization apk contains any grid overrides, apply them
+        // Supported overrides: numRows, numColumns, iconSize
+        applyPartnerDeviceProfileOverrides(context, metrics);
+    }
+
+
     @Nullable
     public TypedValue getAttrValue(int attr) {
         return mExtraAttrs == null ? null : mExtraAttrs.get(attr);
@@ -306,7 +336,7 @@ public class InvariantDeviceProfile {
         }
 
         if (iconSize != oldProfile.iconSize || iconBitmapSize != oldProfile.iconBitmapSize ||
-                !iconShapePath.equals(oldProfile.iconShapePath)) {
+                !iconShapePath.equals(oldProfile.iconShapePath) || !iconPack.equals(oldProfile.iconPack)) {
             changeFlags |= CHANGE_FLAG_ICON_PARAMS;
         }
         if (!iconShapePath.equals(oldProfile.iconShapePath)) {

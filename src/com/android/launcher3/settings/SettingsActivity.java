@@ -22,6 +22,7 @@ import static com.android.launcher3.states.RotationHelper.getAllowRotationDefaul
 import static com.android.launcher3.util.SecureSettingsObserver.newNotificationSettingsObserver;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.ComponentName;
@@ -50,6 +51,15 @@ import androidx.preference.PreferenceGroup.PreferencePositionCallback;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.launcher3.LauncherAppState;
+import com.android.launcher3.LauncherFiles;
+import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
+import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.graphics.GridOptionsProvider;
+import com.android.launcher3.uioverrides.plugins.PluginManagerWrapper;
+import com.android.launcher3.util.SecureSettingsObserver;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -190,6 +200,7 @@ public class SettingsActivity extends Activity
             switch (preference.getKey()) {
                 case NOTIFICATION_DOTS_PREFERENCE_KEY:
                     if (!Utilities.ATLEAST_OREO ||
+                            getContext().getSystemService(ActivityManager.class).isLowRamDevice() ||
                             !getResources().getBoolean(R.bool.notification_dots_enabled)) {
                         return false;
                     }
@@ -261,6 +272,7 @@ public class SettingsActivity extends Activity
 
         @Override
         public void onDestroy() {
+            LauncherAppState.getInstanceNoCreate().checkIfRestartNeeded();
             if (mNotificationDotsObserver != null) {
                 mNotificationDotsObserver.unregister();
                 mNotificationDotsObserver = null;
